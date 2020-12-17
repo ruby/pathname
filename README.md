@@ -1,8 +1,24 @@
 # Pathname
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/pathname`. To experiment with that code, run `bin/console` for an interactive prompt.
+Pathname represents the name of a file or directory on the filesystem,
+but not the file itself.
 
-TODO: Delete this and the text above, and describe your gem
+The pathname depends on the Operating System: Unix, Windows, etc.
+This library works with pathnames of local OS, however non-Unix pathnames
+are supported experimentally.
+
+A Pathname can be relative or absolute.  It's not until you try to
+reference the file that it even matters whether the file exists or not.
+
+Pathname is immutable.  It has no method for destructive update.
+
+The goal of this class is to manipulate file path information in a neater
+way than standard Ruby provides.  The examples below demonstrate the
+difference.
+
+*All* functionality from File, FileTest, and some from Dir and FileUtils is
+included, in an unsurprising way.  It is essentially a facade for all of
+these, and more.
 
 ## Installation
 
@@ -22,7 +38,18 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```ruby
+require 'pathname'
+pn = Pathname.new("/usr/bin/ruby")
+size = pn.size              # 27662
+isdir = pn.directory?       # false
+dir  = pn.dirname           # Pathname:/usr/bin
+base = pn.basename          # Pathname:ruby
+dir, base = pn.split        # [Pathname:/usr/bin, Pathname:ruby]
+data = pn.read
+pn.open { |f| _ }
+pn.each_line { |line| _ }
+```
 
 ## Development
 
@@ -32,5 +59,4 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/hsbpathname.
-
+Bug reports and pull requests are welcome on GitHub at https://github.com/ruby/pathname.
