@@ -1466,6 +1466,7 @@ class TestPathname < Test::Unit::TestCase
   end
 
   def test_relative_path_from_casefold
+    omit unless RUBY_VERSION >= '2.7.0'
     assert_separately([], <<-'end;') #    do
       module File::Constants
         remove_const :FNM_SYSCASE
