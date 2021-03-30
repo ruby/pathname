@@ -341,6 +341,12 @@ path_realdirpath(int argc, VALUE *argv, VALUE self)
     return rb_class_new_instance(1, &str, rb_obj_class(self));
 }
 
+#ifndef RB_PASS_KEYWORDS
+/* Only define macros on Ruby <2.7 */
+#define rb_funcallv_kw(o, m, c, v, kw) rb_funcallv(o, m, c, v)
+#define rb_block_call_kw(o, m, c, v, f, p, kw) rb_block_call(o, m, c, v, f, p)
+#endif
+
 /*
  * call-seq:
  *   pathname.each_line {|line| ... }
