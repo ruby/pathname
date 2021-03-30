@@ -1068,6 +1068,7 @@ class TestPathname < Test::Unit::TestCase
   def test_split
     assert_equal([Pathname("dirname"), Pathname("basename")], Pathname("dirname/basename").split)
 
+    omit unless RUBY_VERSION >= '2.7.0'
     assert_separately([], <<-'end;')
       require 'pathname'
 
