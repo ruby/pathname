@@ -587,12 +587,12 @@ class Pathname    # * FileUtils *
 
   # Recursively deletes a directory, including all directories beneath it.
   #
-  # See FileUtils.rm_r
-  def rmtree(force: nil, noop: nil, verbose: nil, secure: nil)
+  # See FileUtils.rm_rf
+  def rmtree(noop: nil, verbose: nil, secure: nil)
     # The name "rmtree" is borrowed from File::Path of Perl.
     # File::Path provides "mkpath" and "rmtree".
     require 'fileutils'
-    FileUtils.rm_r(@path, force: force, noop: noop, verbose: verbose, secure: secure)
+    FileUtils.rm_rf(@path, noop: noop, verbose: verbose, secure: secure)
     nil
   end
 end
