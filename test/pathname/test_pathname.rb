@@ -557,6 +557,15 @@ class TestPathname < Test::Unit::TestCase
 
   def pathsub(path, pat, repl) Pathname.new(path).sub(pat, repl).to_s end
   defassert(:pathsub, "a.o", "a.c", /\.c\z/, ".o")
+  defassert(:pathsub, "bar/bar", "bar/foo", "foo", "bar")
+
+  def pathbasesub(path, pat, repl) Pathname.new(path).basename_sub(pat, repl).to_s end
+  defassert(:pathbasesub, "a.o", "a.c", /\.c\z/, ".o")
+  defassert(:pathbasesub, "bar", "foo", "foo", "bar")
+  defassert(:pathbasesub, "bar", "foo", /\Afoo\z/, "bar")
+  defassert(:pathbasesub, "foo/bar", "foo/foo", "foo", "bar")
+  defassert(:pathbasesub, "foo/bar", "foo/foo", /\Afoo\z/, "bar")
+  defassert(:pathbasesub, "foo/fofo", "foo/foo", /\A(fo)o\z/, '\1\1')
 
   def pathsubext(path, repl) Pathname.new(path).sub_ext(repl).to_s end
   defassert(:pathsubext, 'a.o', 'a.c', '.o')
