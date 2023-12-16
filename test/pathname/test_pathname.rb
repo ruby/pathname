@@ -1416,6 +1416,19 @@ class TestPathname < Test::Unit::TestCase
     }
   end
 
+  def test_chdir
+    with_tmpchdir('rubytest-pathname') {|dir|
+      prev = Dir.pwd
+      Pathname("foo").mkdir
+      Pathname("foo").chdir
+      assert_equal("#{prev}/foo", Dir.pwd)
+      Pathname("..").chdir do
+        assert_equal(prev, Dir.pwd)
+      end
+      assert_equal("#{prev}/foo", Dir.pwd)
+    }
+  end
+
   def test_find
     with_tmpchdir('rubytest-pathname') {|dir|
       open("a", "w") {}
