@@ -12,6 +12,7 @@ static ID id_binwrite;
 static ID id_birthtime;
 static ID id_blockdev_p;
 static ID id_chardev_p;
+static ID id_chdir;
 static ID id_chmod;
 static ID id_chown;
 static ID id_ctime;
@@ -1248,6 +1249,24 @@ path_opendir(VALUE self)
     return rb_block_call(rb_cDir, id_open, 1, args, 0, 0);
 }
 
+/*
+ * Changes the current path to the referenced directory.
+ *
+ * See Dir.chdir.
+ */
+static VALUE
+path_chdir(VALUE self)
+{
+    VALUE args[1];
+
+    if (rb_block_given_p()) {
+        args[0] = get_strpath(self);
+        return rb_block_call(rb_cDir, id_chdir, 1, args, 0, 0);
+    } else {
+        return rb_funcall(rb_cDir, id_chdir, 1, get_strpath(self));
+    }
+}
+
 static VALUE
 each_entry_i(RB_BLOCK_CALL_FUNC_ARGLIST(elt, klass))
 {
@@ -1470,6 +1489,7 @@ path_f_pathname(VALUE self, VALUE str)
  * - #each_entry(&block)
  * - #mkdir(*args)
  * - #opendir(*args)
+ * - #chdir(*args)
  *
  * === IO
  *
@@ -1589,6 +1609,7 @@ Init_pathname(void)
     rb_define_method(rb_cPathname, "mkdir", path_mkdir, -1);
     rb_define_method(rb_cPathname, "rmdir", path_rmdir, 0);
     rb_define_method(rb_cPathname, "opendir", path_opendir, 0);
+    rb_define_method(rb_cPathname, "chdir", path_chdir, 0);
     rb_define_method(rb_cPathname, "each_entry", path_each_entry, 0);
     rb_define_method(rb_cPathname, "unlink", path_unlink, 0);
     rb_define_method(rb_cPathname, "delete", path_unlink, 0);
@@ -1611,6 +1632,7 @@ InitVM_pathname(void)
     id_birthtime = rb_intern("birthtime");
     id_blockdev_p = rb_intern("blockdev?");
     id_chardev_p = rb_intern("chardev?");
+    id_chdir = rb_intern("chdir");
     id_chmod = rb_intern("chmod");
     id_chown = rb_intern("chown");
     id_ctime = rb_intern("ctime");
