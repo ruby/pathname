@@ -555,6 +555,10 @@ class TestPathname < Test::Unit::TestCase
     assert_equal(nil, "a" <=> Pathname.new("a"))
   end
 
+  def test_comparable
+    assert(Pathname.ancestors.include?(Comparable))
+  end
+
   def pathsub(path, pat, repl) Pathname.new(path).sub(pat, repl).to_s end
   defassert(:pathsub, "a.o", "a.c", /\.c\z/, ".o")
 

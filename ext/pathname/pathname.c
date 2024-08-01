@@ -1504,6 +1504,7 @@ Init_pathname(void)
     InitVM(pathname);
 
     rb_cPathname = rb_define_class("Pathname", rb_cObject);
+    rb_include_module(rb_cPathname, rb_mComparable);
     rb_define_method(rb_cPathname, "initialize", path_initialize, 1);
     rb_define_method(rb_cPathname, "freeze", path_freeze, 0);
     rb_define_method(rb_cPathname, "==", path_eq, 1);
