@@ -550,6 +550,19 @@ class Pathname
       Pathname.new(File.join(*relpath_names))
     end
   end
+
+  # Return a pathname whose basename is substituted by String#sub.
+  #
+  #     path1 = Pathname.new('/usr/bin/perl')
+  #     path1.basename_sub('perl', 'ruby')
+  #         #=> #<Pathname:/usr/bin/ruby>
+  #     path1.basename_sub(/\Aperl\z/, 'ruby')
+  #         #=> #<Pathname:/usr/bin/ruby>
+  #
+  def basename_sub(pattern, replacement)
+    dir, base = split
+    dir + base.sub(pattern, replacement)
+  end
 end
 
 
@@ -602,4 +615,3 @@ class Pathname    # * FileUtils *
     nil
   end
 end
-
