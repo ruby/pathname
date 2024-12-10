@@ -1364,6 +1364,15 @@ class TestPathname < Test::Unit::TestCase
     assert_kind_of(Pathname, wd)
   end
 
+  def test_s_home
+    home = Pathname.home
+    assert_kind_of(Pathname, home)
+    assert_equal(Dir.home, home.to_path)
+    user_home = Pathname.home(ENV['USER'])
+    assert_kind_of(Pathname, user_home)
+    assert_equal(Dir.home(ENV['USER']), user_home.to_path)
+  end
+
   def test_glob
     with_tmpchdir('rubytest-pathname') {|dir|
       Dir.mkdir("d")
