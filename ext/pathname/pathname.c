@@ -31,6 +31,7 @@ static ID id_ftype;
 static ID id_getwd;
 static ID id_glob;
 static ID id_grpowned_p;
+static ID id_home;
 static ID id_lchmod;
 static ID id_lchown;
 static ID id_link;
@@ -1144,6 +1145,35 @@ path_glob(int argc, VALUE *argv, VALUE self)
 }
 
 /*
+ * call-seq:
+ *   Pathname.home(user_name = nil) -> pathname
+ *
+ * Returns the home directory path of the user specified with +user_name+
+ * if it is not +nil+, or the current login user, as a Pathname:
+ *
+ *  Pathname.home
+ *      #=> #<Pathname:/home/me>
+ *  Pathname.home('root')
+ *      #=> #<Pathname:/root>
+ *
+ * Raises ArgumentError if +user_name+ is not a user name.
+ *
+ * See Dir.home.
+ */
+static VALUE
+path_s_home(int argc, VALUE *argv, VALUE klass)
+{
+    VALUE user;
+    VALUE str;
+    if (rb_scan_args(argc, argv, "01", &user) == 0)
+        str = rb_funcall(rb_cDir, id_home, 0);
+    else
+        str = rb_funcall(rb_cDir, id_home, 1, user);
+
+    return rb_class_new_instance(1, &str, klass);
+}
+
+/*
  * Returns the current working directory as a Pathname.
  *
  *	Pathname.getwd
@@ -1460,6 +1490,7 @@ path_f_pathname(VALUE self, VALUE str)
  * These methods are a facade for Dir:
  * - Pathname.glob(*args)
  * - Pathname.getwd / Pathname.pwd
+ * - Pathname.home
  * - #rmdir
  * - #entries
  * - #each_entry(&block)
@@ -1579,6 +1610,7 @@ Init_pathname(void)
     rb_define_singleton_method(rb_cPathname, "glob", path_s_glob, -1);
     rb_define_singleton_method(rb_cPathname, "getwd", path_s_getwd, 0);
     rb_define_singleton_method(rb_cPathname, "pwd", path_s_getwd, 0);
+    rb_define_singleton_method(rb_cPathname, "home", path_s_home, 0);
     rb_define_method(rb_cPathname, "glob", path_glob, -1);
     rb_define_method(rb_cPathname, "entries", path_entries, 0);
     rb_define_method(rb_cPathname, "mkdir", path_mkdir, -1);
@@ -1625,6 +1657,7 @@ InitVM_pathname(void)
     id_getwd = rb_intern("getwd");
     id_glob = rb_intern("glob");
     id_grpowned_p = rb_intern("grpowned?");
+    id_home = rb_intern("home");
     id_lchmod = rb_intern("lchmod");
     id_lchown = rb_intern("lchown");
     id_link = rb_intern("link");
