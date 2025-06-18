@@ -295,6 +295,17 @@ class Pathname
     self.class.new(path)
   end
 
+  # Return a pathname with +repl+ added as a suffix to the basename.
+  #
+  # If self has no extension part, +repl+ is appended.
+  #
+  #	Pathname.new('/usr/bin/shutdown').sub_ext('.rb')
+  #	    #=> #<Pathname:/usr/bin/shutdown.rb>
+  def sub_ext(repl)
+    ext = File.extname(@path)
+    self.class.new(@path.chomp(ext) + repl)
+  end
+
   if File::ALT_SEPARATOR
     SEPARATOR_LIST = "#{Regexp.quote File::ALT_SEPARATOR}#{Regexp.quote File::SEPARATOR}"
     SEPARATOR_PAT = /[#{SEPARATOR_LIST}]/
@@ -842,6 +853,14 @@ class Pathname    # * IO *
 
   # See <tt>IO.sysopen</tt>.
   def sysopen(*args) IO.sysopen(@path, *args) end
+
+  # Writes +contents+ to the file. See <tt>File.write</tt>.
+  def write(...) IO.write(@path, ...) end
+
+  # Writes +contents+ to the file, opening it in binary mode.
+  #
+  # See File.binwrite.
+  def binwrite(...) IO.binwrite(@path, ...) end
 end
 
 
@@ -849,6 +868,12 @@ class Pathname    # * File *
 
   # See <tt>File.atime</tt>.  Returns last access time.
   def atime() File.atime(@path) end
+
+  # Returns the birth time for the file.
+  # If the platform doesn't have birthtime, raises NotImplementedError.
+  #
+  # See File.birthtime.
+  def birthtime() File.birthtime(@path) end
 
   # See <tt>File.ctime</tt>.  Returns last (directory entry, not file) change time.
   def ctime() File.ctime(@path) end
@@ -927,6 +952,13 @@ class Pathname    # * File *
     raise TypeError, 'wrong argument type nil (expected Array)' unless Array === array
     array.map {|f| self.class.new(f) }
   end
+
+  # Returns the real (absolute) pathname for +self+ in the actual filesystem.
+  #
+  # Does not contain symlinks or useless dots, +..+ and +.+.
+  #
+  # All components of the pathname must exist when this method is called.
+  def realpath(*args) self.class.new(File.realpath(@path, *args)) end
 end
 
 
@@ -937,6 +969,17 @@ class Pathname    # * FileTest *
 
   # See <tt>FileTest.chardev?</tt>.
   def chardev?() FileTest.chardev?(@path) end
+
+  # Tests the file is empty.
+  #
+  # See Dir#empty? and FileTest.empty?.
+  def empty?
+    if FileTest.directory?(@path)
+      Dir.empty?(@path)
+    else
+      FileTest.empty?(@path)
+    end
+  end
 
   # See <tt>FileTest.executable?</tt>.
   def executable?() FileTest.executable?(@path) end
@@ -1013,6 +1056,21 @@ class Pathname    # * Dir *
       Dir.glob(*args, **kwargs) {|f| yield self.new(f) }
     else
       Dir.glob(*args, **kwargs).map {|f| self.new(f) }
+    end
+  end
+
+  # Returns or yields Pathname objects.
+  #
+  #  Pathname("ruby-2.4.2").glob("R*.md")
+  #  #=> [#<Pathname:ruby-2.4.2/README.md>, #<Pathname:ruby-2.4.2/README.ja.md>]
+  #
+  # See Dir.glob.
+  # This method uses the +base+ keyword argument of Dir.glob.
+  def glob(*args, **kwargs) # :yield: pathname
+    if block_given?
+      Dir.glob(*args, **kwargs, base: @path) {|f| yield self + f }
+    else
+      Dir.glob(*args, **kwargs, base: @path).map {|f| self + f }
     end
   end
 
