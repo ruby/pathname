@@ -236,11 +236,11 @@ class Pathname
   #
   def initialize(path)
     path = path.to_path if path.respond_to? :to_path
-    @path = path.dup
-
-    if /\0/.match?(@path)
-      raise ArgumentError, "pathname contains \\0: #{@path.inspect}"
+    if /\0/.match?(path)
+      raise ArgumentError, "pathname contains \\0: #{path.inspect}"
     end
+
+    @path = path.dup
   end
 
   def freeze() super; @path.freeze; self end
