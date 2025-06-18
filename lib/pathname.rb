@@ -233,7 +233,7 @@ class Pathname
     path = path.__send__(TO_PATH) if path.respond_to? TO_PATH
     @path = path.dup
 
-    if /\0/ =~ @path
+    if /\0/.match?(@path)
       raise ArgumentError, "pathname contains \\0: #{@path.inspect}"
     end
   end
