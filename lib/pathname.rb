@@ -31,24 +31,25 @@ end
 require 'pathname.so'
 
 #
-# == Pathname
+# Pathname represents the name of a file or directory on the filesystem,
+# but not the file itself.
 #
-# Pathname represents a pathname which locates a file in a filesystem.
-# The pathname depends on OS: Unix, Windows, etc.
-# Pathname library works with pathnames of local OS.
-# However non-Unix pathnames are supported experimentally.
+# The pathname depends on the Operating System: Unix, Windows, etc.
+# This library works with pathnames of local OS, however non-Unix pathnames
+# are supported experimentally.
 #
-# It does not represent the file itself.
 # A Pathname can be relative or absolute.  It's not until you try to
 # reference the file that it even matters whether the file exists or not.
 #
 # Pathname is immutable.  It has no method for destructive update.
 #
-# The value of this class is to manipulate file path information in a neater
+# The goal of this class is to manipulate file path information in a neater
 # way than standard Ruby provides.  The examples below demonstrate the
-# difference.  *All* functionality from File, FileTest, and some from Dir and
-# FileUtils is included, in an unsurprising way.  It is essentially a facade for
-# all of these, and more.
+# difference.
+#
+# *All* functionality from File, FileTest, and some from Dir and FileUtils is
+# included, in an unsurprising way.  It is essentially a facade for all of
+# these, and more.
 #
 # == Examples
 #
@@ -96,8 +97,8 @@ require 'pathname.so'
 # === Core methods
 #
 # These methods are effectively manipulating a String, because that's
-# all a path is.  Except for #mountpoint?, #children, #each_child,
-# #realdirpath and #realpath, they don't access the filesystem.
+# all a path is.  None of these access the file system except for
+# #mountpoint?, #children, #each_child, #realdirpath and #realpath.
 #
 # - +
 # - #join
@@ -146,6 +147,7 @@ require 'pathname.so'
 #
 # These methods are a facade for File:
 # - #atime
+# - #birthtime
 # - #ctime
 # - #mtime
 # - #chmod(mode)
@@ -164,6 +166,7 @@ require 'pathname.so'
 # - #make_symlink(old)
 # - #truncate(length)
 # - #utime(atime, mtime)
+# - #lutime(atime, mtime)
 # - #basename(*args)
 # - #dirname
 # - #extname
@@ -189,6 +192,8 @@ require 'pathname.so'
 # - #binread(*args)
 # - #readlines(*args)
 # - #sysopen(*args)
+# - #write(*args)
+# - #binwrite(*args)
 #
 # === Utilities
 #
