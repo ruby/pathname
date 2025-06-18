@@ -308,6 +308,15 @@ class Pathname
   #	    #=> #<Pathname:/usr/bin/shutdown.rb>
   def sub_ext(repl)
     ext = File.extname(@path)
+
+    # File.extname("foo.bar:stream") returns ".bar" on NTFS and not ".bar:stream"
+    # (see ruby_enc_find_extname()).
+    # The behavior of Pathname#sub_ext is to replace everything
+    # from the start of the extname until the end of the path with repl.
+    unless @path.end_with?(ext)
+      ext = @path[@path.rindex(ext)..]
+    end
+
     self.class.new(@path.chomp(ext) + repl)
   end
 
