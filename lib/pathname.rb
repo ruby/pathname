@@ -236,13 +236,9 @@ class Pathname
     if /\0/ =~ @path
       raise ArgumentError, "pathname contains \\0: #{@path.inspect}"
     end
-
-    self.taint if @path.tainted?
   end
 
   def freeze() super; @path.freeze; self end
-  def taint() super; @path.taint; self end
-  def untaint() super; @path.untaint; self end
 
   #
   # Compare this pathname with +other+.  The comparison is string-based.
@@ -827,8 +823,8 @@ class Pathname    # * IO *
   #
   # This method has existed since 1.8.1.
   #
-  def each_line(*args, &block) # :yield: line
-    IO.foreach(@path, *args, &block)
+  def each_line(...) # :yield: line
+    IO.foreach(@path, ...)
   end
 
   # See <tt>IO.read</tt>.  Returns all data from the file, or the first +N+ bytes
@@ -840,7 +836,7 @@ class Pathname    # * IO *
   def binread(*args) IO.binread(@path, *args) end
 
   # See <tt>IO.readlines</tt>.  Returns all the lines from the file.
-  def readlines(*args) IO.readlines(@path, *args) end
+  def readlines(...) IO.readlines(@path, ...) end
 
   # See <tt>IO.sysopen</tt>.
   def sysopen(*args) IO.sysopen(@path, *args) end
@@ -885,8 +881,8 @@ class Pathname    # * File *
   def make_link(old) File.link(old, @path) end
 
   # See <tt>File.open</tt>.  Opens the file for reading or writing.
-  def open(*args, &block) # :yield: file
-    File.open(@path, *args, &block)
+  def open(...) # :yield: file
+    File.open(@path, ...)
   end
 
   # See <tt>File.readlink</tt>.  Read symbolic link.
@@ -924,7 +920,11 @@ class Pathname    # * File *
 
   # See <tt>File.split</tt>.  Returns the #dirname and the #basename in an
   # Array.
-  def split() File.split(@path).map {|f| self.class.new(f) } end
+  def split()
+    array = File.split(@path)
+    raise TypeError, 'wrong argument type nil (expected Array)' unless Array === array
+    array.map {|f| self.class.new(f) }
+  end
 end
 
 
@@ -1006,11 +1006,11 @@ end
 
 class Pathname    # * Dir *
   # See <tt>Dir.glob</tt>.  Returns or yields Pathname objects.
-  def Pathname.glob(*args) # :yield: pathname
+  def Pathname.glob(*args, **kwargs) # :yield: pathname
     if block_given?
-      Dir.glob(*args) {|f| yield self.new(f) }
+      Dir.glob(*args, **kwargs) {|f| yield self.new(f) }
     else
-      Dir.glob(*args).map {|f| self.new(f) }
+      Dir.glob(*args, **kwargs).map {|f| self.new(f) }
     end
   end
 
@@ -1027,6 +1027,7 @@ class Pathname    # * Dir *
   #
   # This method has existed since 1.8.1.
   def each_entry(&block) # :yield: pathname
+    return to_enum(__method__) unless block_given?
     Dir.foreach(@path) {|f| yield self.class.new(f) }
   end
 
@@ -1124,7 +1125,7 @@ class Pathname    # * mixed *
 end
 
 class Pathname
-  undef =~
+  undef =~ if Kernel.method_defined?(:=~)
 end
 
 module Kernel
@@ -1132,6 +1133,7 @@ module Kernel
   #
   # This method is available since 1.8.5.
   def Pathname(path) # :doc:
+    return path if Pathname === path
     Pathname.new(path)
   end
   private :Pathname
