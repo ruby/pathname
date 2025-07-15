@@ -1087,7 +1087,7 @@ class TestPathname < Test::Unit::TestCase
   def test_split
     assert_equal([Pathname("dirname"), Pathname("basename")], Pathname("dirname/basename").split)
 
-    assert_separately([], <<-'end;')
+    assert_separately(['-rhelper'], <<-'end;')
       require 'pathname'
 
       mod = Module.new do
@@ -1534,7 +1534,7 @@ class TestPathname < Test::Unit::TestCase
   end
 
   def test_relative_path_from_casefold
-    assert_separately([], <<-'end;') #    do
+    assert_separately(['-rhelper'], <<-'end;') #    do
       module File::Constants
         remove_const :FNM_SYSCASE
         FNM_SYSCASE = FNM_CASEFOLD
