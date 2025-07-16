@@ -243,7 +243,11 @@ class Pathname
     @path = path.dup
   end
 
-  def freeze() super; @path.freeze; self end
+  def freeze
+    super
+    @path.freeze
+    self
+  end
 
   #
   # Compare this pathname with +other+.  The comparison is string-based.
@@ -1090,7 +1094,9 @@ class Pathname    # * Dir *
 
   # See <tt>Dir.getwd</tt>.  Returns the current working directory as a Pathname.
   def Pathname.getwd() self.new(Dir.getwd) end
-  class << self; alias pwd getwd end
+  class << self
+    alias pwd getwd
+  end
 
   # Return the entries (files and subdirectories) in the directory, each as a
   # Pathname object.
