@@ -289,9 +289,9 @@ class Pathname
   end
 
   # Return a pathname which is substituted by String#sub.
-  def sub(pattern, *rest, &block)
+  def sub(pattern, *args, **kwargs, &block)
     if block
-      path = @path.sub(pattern, *rest) {|*args|
+      path = @path.sub(pattern, *args, **kwargs) {|*sub_args|
         begin
           old = Thread.current[:pathname_sub_matchdata]
           Thread.current[:pathname_sub_matchdata] = $~
@@ -299,10 +299,10 @@ class Pathname
         ensure
           Thread.current[:pathname_sub_matchdata] = old
         end
-        yield(*args)
+        yield(*sub_args)
       }
     else
-      path = @path.sub(pattern, *rest)
+      path = @path.sub(pattern, *args, **kwargs)
     end
     self.class.new(path)
   end
@@ -863,17 +863,17 @@ class Pathname    # * IO *
 
   # See <tt>IO.read</tt>.  Returns all data from the file, or the first +N+ bytes
   # if specified.
-  def read(*args) IO.read(@path, *args) end
+  def read(...) IO.read(@path, ...) end
 
   # See <tt>IO.binread</tt>.  Returns all the bytes from the file, or the first +N+
   # if specified.
-  def binread(*args) IO.binread(@path, *args) end
+  def binread(...) IO.binread(@path, ...) end
 
   # See <tt>IO.readlines</tt>.  Returns all the lines from the file.
   def readlines(...) IO.readlines(@path, ...) end
 
   # See <tt>IO.sysopen</tt>.
-  def sysopen(*args) IO.sysopen(@path, *args) end
+  def sysopen(...) IO.sysopen(@path, ...) end
 
   # Writes +contents+ to the file. See <tt>File.write</tt>.
   def write(...) IO.write(@path, ...) end
@@ -916,10 +916,10 @@ class Pathname    # * File *
 
   # See <tt>File.fnmatch</tt>.  Return +true+ if the receiver matches the given
   # pattern.
-  def fnmatch(pattern, *args) File.fnmatch(pattern, @path, *args) end
+  def fnmatch(pattern, ...) File.fnmatch(pattern, @path, ...) end
 
   # See <tt>File.fnmatch?</tt> (same as #fnmatch).
-  def fnmatch?(pattern, *args) File.fnmatch?(pattern, @path, *args) end
+  def fnmatch?(pattern, ...) File.fnmatch?(pattern, @path, ...) end
 
   # See <tt>File.ftype</tt>.  Returns "type" of file ("file", "directory",
   # etc).
@@ -955,7 +955,7 @@ class Pathname    # * File *
   def utime(atime, mtime) File.utime(atime, mtime, @path) end
 
   # See <tt>File.basename</tt>.  Returns the last component of the path.
-  def basename(*args) self.class.new(File.basename(@path, *args)) end
+  def basename(...) self.class.new(File.basename(@path, ...)) end
 
   # See <tt>File.dirname</tt>.  Returns all but the last component of the path.
   def dirname() self.class.new(File.dirname(@path)) end
@@ -964,7 +964,7 @@ class Pathname    # * File *
   def extname() File.extname(@path) end
 
   # See <tt>File.expand_path</tt>.
-  def expand_path(*args) self.class.new(File.expand_path(@path, *args)) end
+  def expand_path(...) self.class.new(File.expand_path(@path, ...)) end
 
   # See <tt>File.split</tt>.  Returns the #dirname and the #basename in an
   # Array.
@@ -979,7 +979,7 @@ class Pathname    # * File *
   # Does not contain symlinks or useless dots, +..+ and +.+.
   #
   # All components of the pathname must exist when this method is called.
-  def realpath(*args) self.class.new(File.realpath(@path, *args)) end
+  def realpath(...) self.class.new(File.realpath(@path, ...)) end
 end
 
 
@@ -1115,7 +1115,7 @@ class Pathname    # * Dir *
   end
 
   # See <tt>Dir.mkdir</tt>.  Create the referenced directory.
-  def mkdir(*args) Dir.mkdir(@path, *args) end
+  def mkdir(...) Dir.mkdir(@path, ...) end
 
   # See <tt>Dir.rmdir</tt>.  Remove the referenced directory.
   def rmdir() Dir.rmdir(@path) end
