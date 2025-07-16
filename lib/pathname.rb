@@ -239,7 +239,7 @@ class Pathname
   #
   def initialize(path)
     path = path.to_path if path.respond_to? :to_path
-    if /\0/.match?(path)
+    if path.include?("\0")
       raise ArgumentError, "pathname contains \\0: #{path.inspect}"
     end
 
