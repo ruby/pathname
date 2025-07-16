@@ -228,6 +228,9 @@ class Pathname
     proc {|a, b| a == b}
   end
 
+  attr_reader :path
+  protected :path
+
   # :startdoc:
 
   #
@@ -256,7 +259,7 @@ class Pathname
   #
   def ==(other)
     return false unless Pathname === other
-    other.to_s == @path
+    other.path == @path
   end
   alias === ==
   alias eql? ==
@@ -265,7 +268,7 @@ class Pathname
     # Provides for comparing pathnames, case-sensitively.
     def <=>(other)
       return nil unless Pathname === other
-      @path.tr('/', "\0") <=> other.to_s.tr('/', "\0")
+      @path.tr('/', "\0") <=> other.path.tr('/', "\0")
     end
   end
 
@@ -650,7 +653,7 @@ class Pathname
   #
   def +(other)
     other = Pathname.new(other) unless Pathname === other
-    Pathname.new(plus(@path, other.to_s))
+    Pathname.new(plus(@path, other.path))
   end
   alias / +
 
@@ -811,8 +814,8 @@ class Pathname
   #
   def relative_path_from(base_directory)
     base_directory = Pathname.new(base_directory) unless base_directory.is_a? Pathname
-    dest_directory = self.cleanpath.to_s
-    base_directory = base_directory.cleanpath.to_s
+    dest_directory = self.cleanpath.path
+    base_directory = base_directory.cleanpath.path
     dest_prefix = dest_directory
     dest_names = []
     while r = chop_basename(dest_prefix)
