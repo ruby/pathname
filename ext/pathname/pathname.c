@@ -2,6 +2,7 @@
 
 static VALUE rb_cPathname;
 static ID id_at_path;
+static ID id_sub;
 
 static VALUE
 get_strpath(VALUE obj)
@@ -61,6 +62,27 @@ path_cmp(VALUE self, VALUE other)
     return INT2FIX(0);
 }
 
+/*
+ * Return a pathname which is substituted by String#sub.
+ *
+ *	path1 = Pathname.new('/usr/bin/perl')
+ *	path1.sub('perl', 'ruby')
+ *	    #=> #<Pathname:/usr/bin/ruby>
+ */
+static VALUE
+path_sub(int argc, VALUE *argv, VALUE self)
+{
+    VALUE str = get_strpath(self);
+
+    if (rb_block_given_p()) {
+        str = rb_block_call(str, id_sub, argc, argv, 0, 0);
+    }
+    else {
+        str = rb_funcallv(str, id_sub, argc, argv);
+    }
+    return rb_class_new_instance(1, &str, rb_obj_class(self));
+}
+
 static void init_ids(void);
 
 void
@@ -79,6 +101,7 @@ InitVM_pathname(void)
 {
     rb_cPathname = rb_define_class("Pathname", rb_cObject);
     rb_define_method(rb_cPathname, "<=>", path_cmp, 1);
+    rb_define_method(rb_cPathname, "sub", path_sub, -1);
 }
 
 void
@@ -86,4 +109,5 @@ init_ids(void)
 {
 #undef rb_intern
     id_at_path = rb_intern("@path");
+    id_sub = rb_intern("sub");
 }
