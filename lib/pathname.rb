@@ -1000,7 +1000,7 @@ class Pathname    # * FileTest *
     if FileTest.directory?(@path)
       Dir.empty?(@path)
     else
-      FileTest.empty?(@path)
+      File.empty?(@path)
     end
   end
 
@@ -1035,7 +1035,7 @@ class Pathname    # * FileTest *
   def readable?() FileTest.readable?(@path) end
 
   # See <tt>FileTest.world_readable?</tt>.
-  def world_readable?() FileTest.world_readable?(@path) end
+  def world_readable?() File.world_readable?(@path) end
 
   # See <tt>FileTest.readable_real?</tt>.
   def readable_real?() FileTest.readable_real?(@path) end
@@ -1062,7 +1062,7 @@ class Pathname    # * FileTest *
   def writable?() FileTest.writable?(@path) end
 
   # See <tt>FileTest.world_writable?</tt>.
-  def world_writable?() FileTest.world_writable?(@path) end
+  def world_writable?() File.world_writable?(@path) end
 
   # See <tt>FileTest.writable_real?</tt>.
   def writable_real?() FileTest.writable_real?(@path) end
