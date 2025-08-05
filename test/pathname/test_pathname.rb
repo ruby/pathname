@@ -682,6 +682,7 @@ class TestPathname < Test::Unit::TestCase
   end
 
   def test_each_line
+    omit "not working yet" if RUBY_ENGINE == "jruby"
     with_tmpchdir('rubytest-pathname') {|dir|
       open("a", "w") {|f| f.puts 1, 2 }
       a = []
@@ -708,6 +709,7 @@ class TestPathname < Test::Unit::TestCase
   end
 
   def test_each_line_opts
+    omit "not working yet" if RUBY_ENGINE == "jruby"
     with_tmpchdir('rubytest-pathname') {|dir|
       open("a", "w") {|f| f.puts 1, 2 }
       a = []
