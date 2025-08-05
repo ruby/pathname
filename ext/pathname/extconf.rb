@@ -1,3 +1,9 @@
 # frozen_string_literal: false
+
 require 'mkmf'
-create_makefile('pathname')
+
+if RUBY_ENGINE == "ruby"
+  create_makefile('pathname')
+else
+  File.write("Makefile", dummy_makefile($srcdir).join(""))
+end

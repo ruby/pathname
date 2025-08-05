@@ -28,7 +28,7 @@ if defined?(::Pathname) # Clear builtin Pathname
   # :startdoc:
 end
 
-require 'pathname.so'
+require 'pathname.so' if RUBY_ENGINE == 'ruby'
 
 #
 # Pathname represents the name of a file or directory on the filesystem,
