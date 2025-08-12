@@ -7,7 +7,11 @@ Rake::TestTask.new(:test) do |t|
   t.test_files = FileList["test/**/test_*.rb"]
 end
 
-require 'rake/extensiontask'
-Rake::ExtensionTask.new("pathname")
+if RUBY_ENGINE == 'ruby'
+  require 'rake/extensiontask'
+  Rake::ExtensionTask.new("pathname")
+else
+  task :compile
+end
 
 task :default => [:compile, :test]
