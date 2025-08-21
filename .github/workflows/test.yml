@@ -6,17 +6,26 @@ jobs:
   ruby-versions:
     uses: ruby/actions/.github/workflows/ruby_versions.yml@master
     with:
-      engine: cruby
+      engine: all
 
   test:
     needs: ruby-versions
     name: build (${{ matrix.ruby }} / ${{ matrix.os }})
     strategy:
+      fail-fast: false
       matrix:
         ruby: ${{ fromJson(needs.ruby-versions.outputs.versions) }}
         os: [ ubuntu-latest, macos-latest, windows-latest ]
         exclude:
         - { os: windows-latest , ruby: head }
+        - { os: windows-latest , ruby: truffleruby }
+        - { os: windows-latest , ruby: truffleruby-head }
+        # io/console warnings make CI fail
+        - { os: macos-latest , ruby: jruby }
+        - { os: macos-latest , ruby: jruby-head }
+        # Errno::ESRCH: No such process - File.symlink
+        - { os: windows-latest , ruby: jruby }
+        - { os: windows-latest , ruby: jruby-head }
         include:
         - { os: windows-latest , ruby: mingw }
         - { os: windows-latest , ruby: mswin }
