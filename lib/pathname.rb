@@ -146,6 +146,13 @@ require 'pathname.so' if RUBY_ENGINE == 'ruby'
 # === File property and manipulation methods
 #
 # These methods are a facade for File:
+# - #each_line(*args, &block)
+# - #read(*args)
+# - #binread(*args)
+# - #readlines(*args)
+# - #sysopen(*args)
+# - #write(*args)
+# - #binwrite(*args)
 # - #atime
 # - #birthtime
 # - #ctime
@@ -183,17 +190,6 @@ require 'pathname.so' if RUBY_ENGINE == 'ruby'
 # - #each_entry(&block)
 # - #mkdir(*args)
 # - #opendir(*args)
-#
-# === IO
-#
-# These methods are a facade for IO:
-# - #each_line(*args, &block)
-# - #read(*args)
-# - #binread(*args)
-# - #readlines(*args)
-# - #sysopen(*args)
-# - #write(*args)
-# - #binwrite(*args)
 #
 # === Utilities
 #
@@ -238,7 +234,11 @@ class Pathname
   # If +path+ contains a NUL character (<tt>\0</tt>), an ArgumentError is raised.
   #
   def initialize(path)
-    path = path.to_path if path.respond_to? :to_path
+    unless String === path
+      path = path.to_path if path.respond_to? :to_path
+      raise TypeError unless String === path
+    end
+
     if path.include?("\0")
       raise ArgumentError, "pathname contains \\0: #{path.inspect}"
     end
@@ -852,7 +852,7 @@ class Pathname
   end
 end
 
-class Pathname    # * IO *
+class Pathname    # * File *
   #
   # #each_line iterates over the line in the file.  It yields a String object
   # for each line.
@@ -860,34 +860,30 @@ class Pathname    # * IO *
   # This method has existed since 1.8.1.
   #
   def each_line(...) # :yield: line
-    IO.foreach(@path, ...)
+    File.foreach(@path, ...)
   end
 
-  # See <tt>IO.read</tt>.  Returns all data from the file, or the first +N+ bytes
+  # See <tt>File.read</tt>.  Returns all data from the file, or the first +N+ bytes
   # if specified.
-  def read(...) IO.read(@path, ...) end
+  def read(...) File.read(@path, ...) end
 
-  # See <tt>IO.binread</tt>.  Returns all the bytes from the file, or the first +N+
+  # See <tt>File.binread</tt>.  Returns all the bytes from the file, or the first +N+
   # if specified.
-  def binread(...) IO.binread(@path, ...) end
+  def binread(...) File.binread(@path, ...) end
 
-  # See <tt>IO.readlines</tt>.  Returns all the lines from the file.
-  def readlines(...) IO.readlines(@path, ...) end
+  # See <tt>File.readlines</tt>.  Returns all the lines from the file.
+  def readlines(...) File.readlines(@path, ...) end
 
-  # See <tt>IO.sysopen</tt>.
-  def sysopen(...) IO.sysopen(@path, ...) end
+  # See <tt>File.sysopen</tt>.
+  def sysopen(...) File.sysopen(@path, ...) end
 
   # Writes +contents+ to the file. See <tt>File.write</tt>.
-  def write(...) IO.write(@path, ...) end
+  def write(...) File.write(@path, ...) end
 
   # Writes +contents+ to the file, opening it in binary mode.
   #
   # See File.binwrite.
-  def binwrite(...) IO.binwrite(@path, ...) end
-end
-
-
-class Pathname    # * File *
+  def binwrite(...) File.binwrite(@path, ...) end
 
   # See <tt>File.atime</tt>.  Returns last access time.
   def atime() File.atime(@path) end
@@ -956,6 +952,13 @@ class Pathname    # * File *
   # See <tt>File.utime</tt>.  Update the access and modification times.
   def utime(atime, mtime) File.utime(atime, mtime, @path) end
 
+  # Update the access and modification times of the file.
+  #
+  # Same as Pathname#utime, but does not follow symbolic links.
+  #
+  # See File.lutime.
+  def lutime(atime, mtime) File.lutime(atime, mtime, @path) end
+
   # See <tt>File.basename</tt>.  Returns the last component of the path.
   def basename(...) self.class.new(File.basename(@path, ...)) end
 
@@ -982,6 +985,13 @@ class Pathname    # * File *
   #
   # All components of the pathname must exist when this method is called.
   def realpath(...) self.class.new(File.realpath(@path, ...)) end
+
+  # Returns the real (absolute) pathname of +self+ in the actual filesystem.
+  #
+  # Does not contain symlinks or useless dots, +..+ and +.+.
+  #
+  # The last component of the real pathname can be nonexistent.
+  def realdirpath(...) self.class.new(File.realdirpath(@path, ...)) end
 end
 
 
@@ -1219,5 +1229,5 @@ module Kernel
     return path if Pathname === path
     Pathname.new(path)
   end
-  private :Pathname
+  module_function :Pathname
 end
