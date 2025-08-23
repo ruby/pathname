@@ -1219,5 +1219,5 @@ module Kernel
     return path if Pathname === path
     Pathname.new(path)
   end
-  private :Pathname
+  module_function :Pathname
 end
