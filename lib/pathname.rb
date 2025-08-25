@@ -214,6 +214,7 @@ require 'pathname.so' if RUBY_ENGINE == 'ruby'
 #
 class Pathname
 
+  # The version string.
   VERSION = "0.4.0"
 
   # :stopdoc:
