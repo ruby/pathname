@@ -146,6 +146,12 @@ require 'pathname.so' if RUBY_ENGINE == 'ruby'
 # === File property and manipulation methods
 #
 # These methods are a facade for File:
+# - #each_line(*args, &block)
+# - #read(*args)
+# - #binread(*args)
+# - #readlines(*args)
+# - #write(*args)
+# - #binwrite(*args)
 # - #atime
 # - #birthtime
 # - #ctime
@@ -186,14 +192,8 @@ require 'pathname.so' if RUBY_ENGINE == 'ruby'
 #
 # === IO
 #
-# These methods are a facade for IO:
-# - #each_line(*args, &block)
-# - #read(*args)
-# - #binread(*args)
-# - #readlines(*args)
+# This method is a facade for IO:
 # - #sysopen(*args)
-# - #write(*args)
-# - #binwrite(*args)
 #
 # === Utilities
 #
@@ -214,6 +214,7 @@ require 'pathname.so' if RUBY_ENGINE == 'ruby'
 #
 class Pathname
 
+  # The version string.
   VERSION = "0.4.0"
 
   # :stopdoc:
@@ -239,6 +240,9 @@ class Pathname
   #
   def initialize(path)
     path = path.to_path if path.respond_to? :to_path
+
+    raise TypeError unless path.is_a?(String) # Compatibility for C version
+
     if path.include?("\0")
       raise ArgumentError, "pathname contains \\0: #{path.inspect}"
     end
@@ -338,13 +342,41 @@ class Pathname
   end
 
   if File.dirname('A:') == 'A:.' # DOSish drive letter
-    ABSOLUTE_PATH = /\A(?:[A-Za-z]:|#{SEPARATOR_PAT})/o
+    ABSOLUTE_PATH = /\A(?:[A-Za-z]:|#{SEPARATOR_PAT})/
   else
-    ABSOLUTE_PATH = /\A#{SEPARATOR_PAT}/o
+    ABSOLUTE_PATH = /\A#{SEPARATOR_PAT}/
   end
   private_constant :ABSOLUTE_PATH
 
   # :startdoc:
+
+  # Creates a full path, including any intermediate directories that don't yet
+  # exist.
+  #
+  # See FileUtils.mkpath and FileUtils.mkdir_p
+  def mkpath(mode: nil)
+    path = @path == '/' ? @path : @path.chomp('/')
+
+    stack = []
+    until File.directory?(path) || File.dirname(path) == path
+      stack.push path
+      path = File.dirname(path)
+    end
+
+    stack.reverse_each do |dir|
+      dir = dir == '/' ? dir : dir.chomp('/')
+      if mode
+        Dir.mkdir dir, mode
+        File.chmod mode, dir
+      else
+        Dir.mkdir dir
+      end
+    rescue SystemCallError
+      raise unless File.directory?(dir)
+    end
+
+    self
+  end
 
   # chop_basename(path) -> [pre-basename, basename] or nil
   def chop_basename(path) # :nodoc:
@@ -853,6 +885,11 @@ class Pathname
 end
 
 class Pathname    # * IO *
+  # See <tt>IO.sysopen</tt>.
+  def sysopen(...) IO.sysopen(@path, ...) end
+end
+
+class Pathname    # * File *
   #
   # #each_line iterates over the line in the file.  It yields a String object
   # for each line.
@@ -860,34 +897,27 @@ class Pathname    # * IO *
   # This method has existed since 1.8.1.
   #
   def each_line(...) # :yield: line
-    IO.foreach(@path, ...)
+    File.foreach(@path, ...)
   end
 
-  # See <tt>IO.read</tt>.  Returns all data from the file, or the first +N+ bytes
+  # See <tt>File.read</tt>.  Returns all data from the file, or the first +N+ bytes
   # if specified.
-  def read(...) IO.read(@path, ...) end
+  def read(...) File.read(@path, ...) end
 
-  # See <tt>IO.binread</tt>.  Returns all the bytes from the file, or the first +N+
+  # See <tt>File.binread</tt>.  Returns all the bytes from the file, or the first +N+
   # if specified.
-  def binread(...) IO.binread(@path, ...) end
+  def binread(...) File.binread(@path, ...) end
 
-  # See <tt>IO.readlines</tt>.  Returns all the lines from the file.
-  def readlines(...) IO.readlines(@path, ...) end
-
-  # See <tt>IO.sysopen</tt>.
-  def sysopen(...) IO.sysopen(@path, ...) end
+  # See <tt>File.readlines</tt>.  Returns all the lines from the file.
+  def readlines(...) File.readlines(@path, ...) end
 
   # Writes +contents+ to the file. See <tt>File.write</tt>.
-  def write(...) IO.write(@path, ...) end
+  def write(...) File.write(@path, ...) end
 
   # Writes +contents+ to the file, opening it in binary mode.
   #
   # See File.binwrite.
-  def binwrite(...) IO.binwrite(@path, ...) end
-end
-
-
-class Pathname    # * File *
+  def binwrite(...) File.binwrite(@path, ...) end
 
   # See <tt>File.atime</tt>.  Returns last access time.
   def atime() File.atime(@path) end
@@ -1157,16 +1187,6 @@ end
 
 
 class Pathname    # * FileUtils *
-  # Creates a full path, including any intermediate directories that don't yet
-  # exist.
-  #
-  # See FileUtils.mkpath and FileUtils.mkdir_p
-  def mkpath(mode: nil)
-    require 'fileutils'
-    FileUtils.mkpath(@path, mode: mode)
-    self
-  end
-
   # Recursively deletes a directory, including all directories beneath it.
   #
   # See FileUtils.rm_rf
@@ -1216,8 +1236,12 @@ module Kernel
   #
   # This method is available since 1.8.5.
   def Pathname(path) # :doc:
+    Kernel.Pathname(path)
+  end
+  private :Pathname
+
+  def self.Pathname(path) # Compatibility for C version
     return path if Pathname === path
     Pathname.new(path)
   end
-  private :Pathname
 end
