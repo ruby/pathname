@@ -150,6 +150,7 @@ require 'pathname.so' if RUBY_ENGINE == 'ruby'
 # - #read(*args)
 # - #binread(*args)
 # - #readlines(*args)
+# - #sysopen(*args)
 # - #write(*args)
 # - #binwrite(*args)
 # - #atime
@@ -189,11 +190,6 @@ require 'pathname.so' if RUBY_ENGINE == 'ruby'
 # - #each_entry(&block)
 # - #mkdir(*args)
 # - #opendir(*args)
-#
-# === IO
-#
-# This method is a facade for IO:
-# - #sysopen(*args)
 #
 # === Utilities
 #
@@ -239,9 +235,10 @@ class Pathname
   # If +path+ contains a NUL character (<tt>\0</tt>), an ArgumentError is raised.
   #
   def initialize(path)
-    path = path.to_path if path.respond_to? :to_path
-
-    raise TypeError unless path.is_a?(String) # Compatibility for C version
+    unless String === path
+      path = path.to_path if path.respond_to? :to_path
+      raise TypeError unless String === path
+    end
 
     if path.include?("\0")
       raise ArgumentError, "pathname contains \\0: #{path.inspect}"
@@ -884,11 +881,6 @@ class Pathname
   end
 end
 
-class Pathname    # * IO *
-  # See <tt>IO.sysopen</tt>.
-  def sysopen(...) IO.sysopen(@path, ...) end
-end
-
 class Pathname    # * File *
   #
   # #each_line iterates over the line in the file.  It yields a String object
@@ -910,6 +902,9 @@ class Pathname    # * File *
 
   # See <tt>File.readlines</tt>.  Returns all the lines from the file.
   def readlines(...) File.readlines(@path, ...) end
+
+  # See <tt>File.sysopen</tt>.
+  def sysopen(...) File.sysopen(@path, ...) end
 
   # Writes +contents+ to the file. See <tt>File.write</tt>.
   def write(...) File.write(@path, ...) end
@@ -986,6 +981,13 @@ class Pathname    # * File *
   # See <tt>File.utime</tt>.  Update the access and modification times.
   def utime(atime, mtime) File.utime(atime, mtime, @path) end
 
+  # Update the access and modification times of the file.
+  #
+  # Same as Pathname#utime, but does not follow symbolic links.
+  #
+  # See File.lutime.
+  def lutime(atime, mtime) File.lutime(atime, mtime, @path) end
+
   # See <tt>File.basename</tt>.  Returns the last component of the path.
   def basename(...) self.class.new(File.basename(@path, ...)) end
 
@@ -1012,6 +1014,13 @@ class Pathname    # * File *
   #
   # All components of the pathname must exist when this method is called.
   def realpath(...) self.class.new(File.realpath(@path, ...)) end
+
+  # Returns the real (absolute) pathname of +self+ in the actual filesystem.
+  #
+  # Does not contain symlinks or useless dots, +..+ and +.+.
+  #
+  # The last component of the real pathname can be nonexistent.
+  def realdirpath(...) self.class.new(File.realdirpath(@path, ...)) end
 end
 
 
@@ -1236,12 +1245,8 @@ module Kernel
   #
   # This method is available since 1.8.5.
   def Pathname(path) # :doc:
-    Kernel.Pathname(path)
-  end
-  private :Pathname
-
-  def self.Pathname(path) # Compatibility for C version
     return path if Pathname === path
     Pathname.new(path)
   end
+  module_function :Pathname
 end

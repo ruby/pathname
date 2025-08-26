@@ -40,3 +40,20 @@ jobs:
       run: bundle install
     - name: Run test
       run: rake compile test
+
+  spec:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+      - uses: actions/checkout@v5
+        with:
+          repository: ruby/spec
+          path: rubyspec
+      - name: Clone MSpec
+        run: git clone https://github.com/ruby/mspec.git ../mspec
+      - run: bundle install
+      - run: rake compile
+      - run: ../mspec/bin/mspec -Ilib rubyspec/library/pathname
