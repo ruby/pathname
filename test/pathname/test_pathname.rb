@@ -1497,12 +1497,102 @@ class TestPathname < Test::Unit::TestCase
     }
   end
 
-  def test_rmtree
+  #
+  # tests for FileUtils facades
+  #
+
+  def test_mkdir_p
     with_tmpchdir('rubytest-pathname') {|dir|
-      Pathname("a/b/c/d").mkpath
+      Pathname("a/b/c/d").mkdir_p
+      assert_file.directory?("a/b/c/d")
+    }
+  end
+
+  def test_ln
+    return if !has_hardlink?
+    with_tmpchdir('rubytest-pathname') {|dir|
+      Pathname("a").write("abc")
+      Pathname("a").ln("b")
+      assert_file.identical?("a", "b")
+    }
+  end
+
+  def test_ln_s
+    with_tmpchdir('rubytest-pathname') {|dir|
+      Pathname("a").write("abc")
+      Pathname("a").ln_s("b")
+      assert_equal "a", File.readlink("b")
+    }
+  end
+
+  def test_ln_sf
+    with_tmpchdir('rubytest-pathname') {|dir|
+      Pathname("a").write("abc")
+      2.times do
+        assert_nothing_raised { Pathname("a").ln_sf("b") }
+      end
+    }
+  end
+
+  def test_cp
+    with_tmpchdir('rubytest-pathname') {|dir|
+      Pathname("a").write("abc")
+      Pathname("a").cp("b")
+      assert_equal "abc", Pathname("b").read
+    }
+  end
+
+  def test_cp_r
+    with_tmpchdir('rubytest-pathname') {|dir|
+      Pathname("1/a/b").mkdir_p
+      Pathname("1/a/b/c").write("abc")
+      Pathname("1").cp_r("2")
+      assert_equal "abc", Pathname("2/a/b/c").read
+    }
+  end
+
+  def test_mv
+    with_tmpchdir('rubytest-pathname') {|dir|
+      Pathname("a").write("abc")
+      Pathname("a").mv("b")
+      assert_file.not_exist?("a")
+      assert_equal "abc", Pathname("b").read
+    }
+  end
+
+  def test_rm
+    with_tmpchdir('rubytest-pathname') {|dir|
+      Pathname("a").write("abc")
+      assert_file.exist?("a")
+      Pathname("a").rm
+      assert_file.not_exist?("a")
+    }
+  end
+
+  def test_rm_r
+    with_tmpchdir('rubytest-pathname') {|dir|
+      Pathname("a/b/c/d").mkdir_p
       assert_file.exist?("a/b/c/d")
-      path = Pathname("a")
-      assert_equal(path, path.rmtree)
+      Pathname("a").rm_r
+      assert_file.not_exist?("a")
+    }
+  end
+
+  def test_rm_rf
+    with_tmpchdir('rubytest-pathname') {|dir|
+      Pathname("a/b/c/d").mkdir_p
+      assert_file.exist?("a/b/c/d")
+      2.times { Pathname("a").rm_rf }
+      assert_file.not_exist?("a")
+    }
+  end
+
+  def test_rmtree
+    # rmtree is an alias for rm_rf
+    with_tmpchdir('rubytest-pathname') {|dir|
+      Pathname("a/b/c/d").mkdir_p
+      assert_file.exist?("a/b/c/d")
+      2.times { Pathname("a").rm_rf }
       assert_file.not_exist?("a")
     }
   end

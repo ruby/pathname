@@ -1196,16 +1196,36 @@ end
 
 
 class Pathname    # * FileUtils *
-  # Recursively deletes a directory, including all directories beneath it.
-  #
-  # See FileUtils.rm_rf
-  def rmtree(noop: nil, verbose: nil, secure: nil)
-    # The name "rmtree" is borrowed from File::Path of Perl.
-    # File::Path provides "mkpath" and "rmtree".
-    require 'fileutils'
-    FileUtils.rm_rf(@path, noop: noop, verbose: verbose, secure: secure)
-    self
-  end
+  # See <tt>FileUtils.mkdir_p</tt>.
+  def mkdir_p(...) require 'fileutils' ; FileUtils.mkdir_p(self, ...) end
+
+  # See <tt>FileUtils.ln</tt>.
+  def ln(...) require 'fileutils' ; FileUtils.ln(self, ...) end
+
+  # See <tt>FileUtils.ln_s</tt>.
+  def ln_s(...) require 'fileutils' ; FileUtils.ln_s(self, ...) end
+
+  # See <tt>FileUtils.ln_sf</tt>.
+  def ln_sf(...) require 'fileutils' ; FileUtils.ln_sf(self, ...) end
+
+  # See <tt>FileUtils.cp</tt>.
+  def cp(...) require 'fileutils' ; FileUtils.cp(self, ...) end
+
+  # See <tt>FileUtils.cp_r</tt>.
+  def cp_r(...) require 'fileutils' ; FileUtils.cp_r(self, ...) end
+
+  # See <tt>FileUtils.mv</tt>.
+  def mv(...) require 'fileutils' ; FileUtils.mv(self, ...) end
+
+  # See <tt>FileUtils.rm</tt>.
+  def rm(...) require 'fileutils' ; FileUtils.rm(self, ...) end
+
+  # See <tt>FileUtils.rm_r</tt>.
+  def rm_r(...) require 'fileutils' ; FileUtils.rm_r(self, ...) end
+
+  # See <tt>FileUtils.rm_rf</tt>.
+  def rm_rf(...) require 'fileutils' ; FileUtils.rm_rf(self, ...) end
+  alias rmtree rm_rf
 end
 
 class Pathname    # * tmpdir *
