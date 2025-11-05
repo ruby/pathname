@@ -1,6 +1,6 @@
 name = File.basename(__FILE__, ".gemspec")
 version = ["lib", "ext/lib"].find do |dir|
-  break File.foreach(File.join(__dir__, dir, "#{name}.rb")) do |line|
+  break File.foreach(File.join(__dir__, dir, "#{name}_builtin.rb")) do |line|
     /^\s*VERSION\s*=\s*"(.*)"/ =~ line and break $1
   end rescue nil
 end
