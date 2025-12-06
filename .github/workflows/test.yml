@@ -40,7 +40,6 @@ jobs:
       run: bundle install
     - name: Run test
       run: rake compile test
-      continue-on-error: ${{ contains(matrix.ruby, 'truffleruby') }}
 
   spec:
     runs-on: ubuntu-latest
