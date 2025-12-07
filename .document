@@ -1,5 +1,5 @@
 BSDL
 COPYING
 README.md
-ext/
-lib/
+ext/pathname/*.c
+lib/*.rb
