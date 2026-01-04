@@ -15,18 +15,30 @@ get_strpath(VALUE obj)
 }
 
 /*
- *  Provides a case-sensitive comparison operator for pathnames.
+ * call-seq:
+ *   self <=> other -> -1, 0, 1, or nil
  *
- *	Pathname.new('/usr') <=> Pathname.new('/usr/bin')
- *	    #=> -1
- *	Pathname.new('/usr/bin') <=> Pathname.new('/usr/bin')
- *	    #=> 0
- *	Pathname.new('/usr/bin') <=> Pathname.new('/USR/BIN')
- *	    #=> 1
+ * Compares +self.to_s+ and +other.to_s+,
+ * evaluating their string contents, not their string lengths;
+ * see String#<=>.
  *
- *  It will return +-1+, +0+ or +1+ depending on the value of the left argument
- *  relative to the right argument. Or it will return +nil+ if the arguments
- *  are not comparable.
+ * Returns:
+ *
+ * - +-1+, if +self+ is smaller.
+ * - +0+, if the two are equal.
+ * - +1+, if +self+ is larger.
+ * - +nil+, if +other+ is not a pathname.
+ *
+ * Examples:
+ *
+ *   Pathname('a')  <=> Pathname('b')  # => -1
+ *   Pathname('a')  <=> Pathname('ab') # => -1
+ *   Pathname('a')  <=> Pathname('a')  # => 0
+ *   Pathname('b')  <=> Pathname('a')  # => 1
+ *   Pathname('ab') <=> Pathname('a')  # => 1
+ *   Pathname('a')  <=> Pathname('A')  # => 1
+ *   Pathname('a')  <=> :a             # => nil
+ *
  */
 static VALUE
 path_cmp(VALUE self, VALUE other)
