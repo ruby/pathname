@@ -10,8 +10,7 @@
 # For documentation, see class Pathname.
 #
 
-# A \Pathname object contains the string path to a file or directory
-# in the underlying file system;
+# A \Pathname object contains the string path for the underlying file system;
 # it does not represent the actual corresponding file or directory
 # -- which in fact may or may not exist.
 #
