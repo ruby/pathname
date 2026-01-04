@@ -1132,7 +1132,28 @@ end
 
 
 class Pathname    # * Dir *
-  # See <tt>Dir.glob</tt>.  Returns or yields Pathname objects.
+
+  # call-seq:
+  #   Pathname.glob(*args, **kwargs) -> array_of_pathnames
+  #   Pathname.glob(*args, **kwargs) {|pathname| ... } -> nil
+  #
+  # Calls <tt>Dir.glob(*args, **kwargs)</tt>, which yields or returns entry names;
+  # see Dir.glob.
+  #
+  # With a block given, calls the block with each pathname
+  # <tt>Pathname.new(entry_name)</tt>,
+  # where each +entry_name+ is an entry name yielded by Dir.glob.
+  #
+  #   a = []
+  #   Pathname.glob('R*') {|pathname| a << pathname }
+  #   a # => [#<Pathname:README.md>, #<Pathname:Rakefile>]
+  #
+  # With no block given, returns an array of \Pathname objects;
+  # each is <tt>Pathname.new(entry_name)</tt> for an entry name returned by Dir.glob.
+  #
+  #   Pathname.glob('*').take(3)
+  #   # => [#<Pathname:BSDL>, #<Pathname:COPYING>, #<Pathname:Gemfile>]
+  #
   def Pathname.glob(*args, **kwargs) # :yield: pathname
     if block_given?
       Dir.glob(*args, **kwargs) {|f| yield self.new(f) }
