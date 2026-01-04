@@ -207,10 +207,20 @@ class Pathname
 
   # :startdoc:
 
+  # call-seq:
+  #   Pathname.new(path) -> new_pathname
   #
-  # Create a Pathname object from the given String (or String-like object).
-  # If +path+ contains a NUL character (<tt>\0</tt>), an ArgumentError is raised.
+  # Returns a new \Pathname object for the given +path+,
+  # which must be a string or a string-like object;
+  # +path+ may be relative or absolute:
   #
+  #   Pathname.new('lib/pathname') # => #<Pathname:lib/pathname>
+  #   Pathname.new('/usr/bin')     # => #<Pathname:/usr/bin>
+  #
+  # The new pathname stores a copy of +path+, so that later changes
+  # to that object do not affect the pathname.
+  #
+  # Raises ArgumentError if +path+ contains the null character <tt>"\0"</tt>.
   def initialize(path)
     @path = File.path(path).dup
   rescue TypeError => e
