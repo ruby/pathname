@@ -10,67 +10,83 @@
 # For documentation, see class Pathname.
 #
 
+# A \Pathname object contains the string path for the underlying file system;
+# it does not represent the actual corresponding file or directory
+# -- which in fact may or may not exist.
 #
-# Pathname represents the name of a file or directory on the filesystem,
-# but not the file itself.
+# A \Pathname object is immutable (except for method #freeze).
 #
-# The pathname depends on the Operating System: Unix, Windows, etc.
-# This library works with pathnames of local OS, however non-Unix pathnames
-# are supported experimentally.
+# The class works well with Unix-based file systems;
+# support for other file systems is experimental and subject to change.
 #
-# A Pathname can be relative or absolute.  It's not until you try to
-# reference the file that it even matters whether the file exists or not.
+# A pathname may be relative or absolute:
 #
-# Pathname is immutable.  It has no method for destructive update.
+#   Pathname.new('lib')            # => #<Pathname:lib>
+#   Pathname.new('/usr/local/bin') # => #<Pathname:/usr/local/bin>
 #
-# The goal of this class is to manipulate file path information in a neater
-# way than standard Ruby provides.  The examples below demonstrate the
-# difference.
+# == Convenience Methods
 #
-# *All* functionality from File, FileTest, and some from Dir and FileUtils is
-# included, in an unsurprising way.  It is essentially a facade for all of
-# these, and more.
+# \Class \Pathname provides many convenience methods that are easier to write (and read!)
+# than Ruby alternatives; see examples below.
+# The class provides *all* functionality from class File and module FileTest,
+# along with some functionality from class Dir and module FileUtils.
 #
-# == Examples
+# Here's an example string path and corresponding \Pathname object:
 #
-# === Example 1: Using Pathname
+#   path = '/usr/bin/ruby'
+#   pn = Pathname.new(path)
 #
-#   require 'pathname'
-#   pn = Pathname.new("/usr/bin/ruby")
-#   size = pn.size              # 27662
-#   isdir = pn.directory?       # false
-#   dir  = pn.dirname           # Pathname:/usr/bin
-#   base = pn.basename          # Pathname:ruby
-#   dir, base = pn.split        # [Pathname:/usr/bin, Pathname:ruby]
-#   data = pn.read
-#   pn.open { |f| _ }
-#   pn.each_line { |line| _ }
+# These method pairs (\Pathname vs. \File) give exactly the same results:
 #
-# === Example 2: Using standard Ruby
+#   pn.size               # => 14488
+#   File.size(path)       # => 14488
 #
-#   pn = "/usr/bin/ruby"
-#   size = File.size(pn)        # 27662
-#   isdir = File.directory?(pn) # false
-#   dir  = File.dirname(pn)     # "/usr/bin"
-#   base = File.basename(pn)    # "ruby"
-#   dir, base = File.split(pn)  # ["/usr/bin", "ruby"]
-#   data = File.read(pn)
-#   File.open(pn) { |f| _ }
-#   File.foreach(pn) { |line| _ }
+#   pn.directory?         # => false
+#   File.directory?(path) # => false
 #
-# === Example 3: Special features
+#   pn.read.size          # => 14487
+#   File.read(path).size  # => 14487
 #
-#   p1 = Pathname.new("/usr/lib")   # Pathname:/usr/lib
-#   p2 = p1 + "ruby/1.8"            # Pathname:/usr/lib/ruby/1.8
-#   p3 = p1.parent                  # Pathname:/usr
-#   p4 = p2.relative_path_from(p3)  # Pathname:lib/ruby/1.8
-#   pwd = Pathname.pwd              # Pathname:/home/gavin
-#   pwd.absolute?                   # true
-#   p5 = Pathname.new "."           # Pathname:.
-#   p5 = p5 + "music/../articles"   # Pathname:music/../articles
-#   p5.cleanpath                    # Pathname:articles
-#   p5.realpath                     # Pathname:/home/gavin/articles
-#   p5.children                     # [Pathname:/home/gavin/articles/linux, ...]
+# These method pairs give similar results,
+# but the pathname methods return versatile \Pathname objects instead of strings:
+#
+#   pn.dirname            # => #<Pathname:/usr/bin>
+#   File.dirname(path)    # => "/usr/bin"
+#
+#   pn.basename           # => #<Pathname:ruby>
+#   File.basename(path)   # => "ruby"
+#
+#   pn.split              # => [#<Pathname:/usr/bin>, #<Pathname:ruby>]
+#   File.split(path)      # => ["/usr/bin", "ruby"]
+#
+# These method pairs take blocks:
+#
+#   pn.open do |file|
+#     # Do something with file; file closed on block exit.
+#   end
+#   File.open(path) {|file| }
+#
+#   pn.each_line do |line|
+#     # Do something with the line.
+#   end
+#   File.foreach(path) {|line| }
+#
+# == More Methods
+#
+# Here is a sampling of other available methods:
+#
+#   p1 = Pathname.new('/usr/lib')  # => #<Pathname:/usr/lib>
+#   p1.absolute?                   # => true
+#   p2 = p1 + 'ruby/4.0'           # => #<Pathname:/usr/lib/ruby/4.0>
+#   p3 = p1.parent                 # => #<Pathname:/usr>
+#   p4 = p2.relative_path_from(p3) # => #<Pathname:lib/ruby/4.0>
+#   p4.absolute?                   # => false
+#   p5 = Pathname.new('.')         # => #<Pathname:.>
+#   p6 = p5 + 'usr/../var'         # => #<Pathname:usr/../var>
+#   p6.cleanpath                   # => #<Pathname:var>
+#   p6.realpath                    # => #<Pathname:/var>
+#   p6.children.take(2)
+#   # => [#<Pathname:usr/../var/local>, #<Pathname:usr/../var/spool>]
 #
 # == Breakdown of functionality
 #
