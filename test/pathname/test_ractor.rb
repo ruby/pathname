@@ -8,6 +8,7 @@ class TestPathnameRactor < Test::Unit::TestCase
   end
 
   def test_ractor_shareable
+    omit "Ractor with Pathname is not supported on mingw" if /mingw/ =~ RUBY_PLATFORM
     assert_separately([], "#{<<~"begin;"}\n#{<<~'end;'}")
     class Ractor
       alias value take
