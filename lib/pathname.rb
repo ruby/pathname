@@ -10,27 +10,11 @@
 # For documentation, see class Pathname.
 #
 
-if defined?(::Pathname) # Clear builtin Pathname
-  # :stopdoc:
-  class ::Object
-    remove_const :Pathname
-  end
+unless RUBY_VERSION >= '4'
+  require 'pathname.so' if RUBY_ENGINE == 'ruby'
 
-  # Remove module_function Pathname
-  class << ::Kernel
-    undef Pathname
-  end
-  module ::Kernel
-    undef Pathname
-  end
-
-  $".delete('pathname.so')
-  # :startdoc:
+  require_relative 'pathname_builtin'
 end
-
-require 'pathname.so' if RUBY_ENGINE == 'ruby'
-
-require_relative 'pathname_builtin'
 
 class Pathname    # * Find *
   #
