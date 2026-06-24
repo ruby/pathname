@@ -165,6 +165,7 @@
 # These methods are a facade for Dir:
 # - Pathname.glob(*args)
 # - Pathname.getwd / Pathname.pwd
+# - Pathname.home
 # - #rmdir
 # - #entries
 # - #each_entry(&block)
@@ -1168,6 +1169,10 @@ class Pathname    # * Dir *
   class << self
     alias pwd getwd
   end
+
+  # See <tt>Dir.home</tt>.  Returns the home directory of the current user, or
+  # the named user if given, as a Pathname.
+  def Pathname.home(user_name = nil) self.new(Dir.home(user_name)) end
 
   # Return the entries (files and subdirectories) in the directory, each as a
   # Pathname object.
