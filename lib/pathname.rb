@@ -10,6 +10,8 @@
 # For documentation, see class Pathname.
 #
 
+return if RUBY_VERSION >= '4.1'
+
 unless RUBY_VERSION >= '4'
   require 'pathname.so' if RUBY_ENGINE == 'ruby'
 
