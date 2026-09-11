@@ -239,7 +239,30 @@ class Pathname
   alias eql? ==
 
   unless method_defined?(:<=>, false)
-    # Provides for comparing pathnames, case-sensitively.
+    # call-seq:
+    #   self <=> other -> -1, 0, 1, or nil
+    #
+    # Compares +self.to_s+ and +other.to_s+,
+    # evaluating their string contents, not their string lengths;
+    # see String#<=>.
+    #
+    # Returns:
+    #
+    # - +-1+, if +self+ is smaller.
+    # - +0+, if the two are equal.
+    # - +1+, if +self+ is larger.
+    # - +nil+, if +other+ is not a pathname.
+    #
+    # Examples:
+    #
+    #   Pathname('a')  <=> Pathname('b')  # => -1
+    #   Pathname('a')  <=> Pathname('ab') # => -1
+    #   Pathname('a')  <=> Pathname('a')  # => 0
+    #   Pathname('b')  <=> Pathname('a')  # => 1
+    #   Pathname('ab') <=> Pathname('a')  # => 1
+    #   Pathname('a')  <=> Pathname('A')  # => 1
+    #   Pathname('a')  <=> :a             # => nil
+    #
     def <=>(other)
       return nil unless Pathname === other
       @path.tr('/', "\0") <=> other.path.tr('/', "\0")
