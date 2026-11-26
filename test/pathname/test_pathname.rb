@@ -1347,8 +1347,9 @@ class TestPathname < Test::Unit::TestCase
   end
 
   def test_s_glob_3args
-    # Note: truffleruby should behave like CRuby 3.1+, but it's not the case currently
-    expect = (RUBY_VERSION >= "3.1" && RUBY_ENGINE != "truffleruby") ? [Pathname("."), Pathname("f")] : [Pathname("."), Pathname(".."), Pathname("f")]
+    # TruffleRuby behaves like CRuby 3.1+ since 40.0
+    no_dotdot = RUBY_ENGINE == "truffleruby" ? RUBY_ENGINE_VERSION >= "40" : RUBY_VERSION >= "3.1"
+    expect = no_dotdot ? [Pathname("."), Pathname("f")] : [Pathname("."), Pathname(".."), Pathname("f")]
     with_tmpchdir('rubytest-pathname') {|dir|
       open("f", "w") {|f| f.write "abc" }
       Dir.chdir("/") {
