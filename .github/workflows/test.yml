@@ -28,7 +28,8 @@ jobs:
         - { os: windows-latest , ruby: jruby-head }
         include:
         - { os: windows-latest , ruby: mingw }
-        - { os: windows-latest , ruby: mswin }
+        - { os: windows-latest , ruby: mswin-head }
+        - { os: windows-latest , ruby: mswin-4.0 }
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v7
